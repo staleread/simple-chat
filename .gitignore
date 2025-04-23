@@ -56,3 +56,10 @@ profile-*
 profile*
 *clinic*
 *flamegraph*
+
+# environment
+.env
+!.env.template
+
+# prisma
+generated/prisma

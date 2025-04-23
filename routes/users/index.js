@@ -34,18 +34,7 @@ export default async (server, opts) => {
       }
     },
     handler: async (req, reply) => {
-      return [
-        {
-          id: 12,
-          username: 'nicolas',
-          bio: null
-        },
-        {
-          id: 14,
-          username: 'nicolas442',
-          bio: 'Something usual...'
-        }
-      ]
+      return await server.prisma.user.findMany()
     }
   })
 
@@ -79,14 +68,14 @@ export default async (server, opts) => {
     handler: async (req, reply) => {
       const { userId } = req.params
 
-      if (userId === 13) {
+      const user = await server.prisma.user.findUnique({
+        where: { id: userId }
+      })
+
+      if (!user) {
         return reply.notFound('User not found')
       }
-      return {
-        id: userId,
-        username: 'nicolas',
-        bio: 'undefined...'
-      }
+      return user
     }
   })
 }
