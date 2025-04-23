@@ -26,16 +26,24 @@ DATABASE_URL="postgresql://mykola:1234@localhost:5432/simple-chat-db"
 
 Install dependencies:
 
-`pnpm install`
+```
+pnpm install
+```
 
 Generate Prisma client
 
-`pnpm prisma generate`
+```
+pnpm prisma generate
+```
 
 Synchronize the DB with current Prisma schema
 
-`pnpm prisma db push`
+```
+pnpm prisma db push
+```
 
 ### Run server
 
-`pnpm dev`
+```
+pnpm dev
+```
