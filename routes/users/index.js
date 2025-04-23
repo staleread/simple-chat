@@ -78,4 +78,71 @@ export default async (server, opts) => {
       return user
     }
   })
+
+  server.addSchema({
+    $id: 'UserCreate',
+    type: 'object',
+    properties: {
+      username: {
+        type: 'string',
+        minLength: 2,
+        maxLength: 30
+      },
+      bio: {
+        type: ['string']
+      }
+    },
+    required: ['username']
+  })
+
+  server.route({
+    method: 'POST',
+    url: '/',
+    schema: {
+      description: 'Create new user',
+      tags: ['Users'],
+      body: { $ref: 'UserCreate' },
+      response: {
+        201: {
+          description: 'Successful response',
+          type: 'object',
+          properties: {
+            userId: {
+              type: 'integer',
+              minimum: 1
+            }
+          },
+          required: ['userId']
+        },
+        400: {
+          description: 'Error response',
+          $ref: 'HttpError'
+        }
+      }
+    },
+    handler: async (req, reply) => {
+      const dto = req.body
+
+      const usersWithUsernameCount = await server.prisma.user.count({
+        where: {
+          username: dto.username
+        }
+      })
+
+      if (usersWithUsernameCount) {
+        return reply.badRequest('The username is already taken')
+      }
+
+      const { id } = await server.prisma.user.create({
+        data: {
+          username: dto.username,
+          bio: dto.bio ?? null
+        },
+        select: { id: true }
+      })
+
+      reply.code(201)
+      return { userId: id }
+    }
+  })
 }
