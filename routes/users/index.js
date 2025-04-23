@@ -23,8 +23,21 @@ export default async (server, opts) => {
     method: 'GET',
     url: '/',
     schema: {
-      description: 'Get all users',
+      description: 'Get list of users',
       tags: ['Users'],
+      query: {
+        type: 'object',
+        properties: {
+          hasBio: {
+            description: 'Whether searched users must have (no) bio present',
+            type: 'boolean'
+          },
+          usernameLike: {
+            description: 'A username search string',
+            type: 'string'
+          }
+        }
+      },
       response: {
         200: {
           description: 'Successful response',
@@ -34,7 +47,17 @@ export default async (server, opts) => {
       }
     },
     handler: async (req, reply) => {
-      return await server.prisma.user.findMany()
+      const { hasBio, usernameLike } = req.query
+      const where = {}
+
+      if (hasBio !== undefined) {
+        where.bio = hasBio ? { not: null } : null
+      }
+
+      if (usernameLike) {
+        where.username = { contains: usernameLike }
+      }
+      return await server.prisma.user.findMany({ where })
     }
   })
 
