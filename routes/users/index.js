@@ -1,29 +1,35 @@
 export default async (server, opts) => {
+  server.addSchema({
+    $id: 'User',
+    type: 'object',
+    properties: {
+      id: {
+        type: 'integer',
+        minimum: 1
+      },
+      username: {
+        type: 'string',
+        minLength: 2,
+        maxLength: 30
+      },
+      bio: {
+        type: ['string', 'null']
+      }
+    },
+    required: ['id', 'username', 'bio']
+  })
+
   server.route({
     method: 'GET',
     url: '/',
     schema: {
+      description: 'Get all users',
+      tags: ['Users'],
       response: {
         200: {
+          description: 'Successful response',
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: {
-                type: 'integer',
-                minimum: 1
-              },
-              username: {
-                type: 'string',
-                minLength: 2,
-                maxLength: 30
-              },
-              bio: {
-                type: ['string', 'null']
-              }
-            },
-            required: ['id', 'username', 'bio']
-          }
+          items: { $ref: 'User' }
         }
       }
     },
@@ -47,10 +53,13 @@ export default async (server, opts) => {
     method: 'GET',
     url: '/:userId',
     schema: {
+      description: 'Get user by ID',
+      tags: ['Users'],
       params: {
         type: 'object',
         properties: {
           userId: {
+            description: 'User ID',
             type: 'integer',
             minimum: 1
           }
@@ -58,24 +67,13 @@ export default async (server, opts) => {
       },
       response: {
         200: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'integer',
-              minimum: 1
-            },
-            username: {
-              type: 'string',
-              minLength: 2,
-              maxLength: 30
-            },
-            bio: {
-              type: ['string', 'null']
-            }
-          },
-          required: ['id', 'username', 'bio']
+          description: 'Successful response',
+          $ref: 'User'
         },
-        404: { $ref: 'HttpError' }
+        404: {
+          description: 'Error response',
+          $ref: 'HttpError'
+        }
       }
     },
     handler: async (req, reply) => {
