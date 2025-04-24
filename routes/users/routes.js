@@ -49,17 +49,7 @@ export default async (server, opts) => {
       }
     },
     handler: async (req, reply) => {
-      const { hasBio, usernameLike } = req.query
-      const where = {}
-
-      if (hasBio !== undefined) {
-        where.bio = hasBio ? { not: null } : null
-      }
-
-      if (usernameLike) {
-        where.username = { contains: usernameLike }
-      }
-      return await users.findMany({ where })
+      return await server.users.getAll(req.query)
     }
   })
 
@@ -92,15 +82,7 @@ export default async (server, opts) => {
     },
     handler: async (req, reply) => {
       const { userId } = req.params
-
-      const user = await users.findUnique({
-        where: { id: userId }
-      })
-
-      if (!user) {
-        return reply.notFound('User not found')
-      }
-      return user
+      return await server.users.get(userId)
     }
   })
 
@@ -148,24 +130,8 @@ export default async (server, opts) => {
     handler: async (req, reply) => {
       const dto = req.body
 
-      const usesrnameIsTaken = await users.findFirst({
-        where: { username: dto.username },
-        select: { id: true }
-      })
-
-      if (usesrnameIsTaken) {
-        return reply.badRequest('The username is already taken')
-      }
-
       reply.code(201)
-
-      return await users.create({
-        data: {
-          username: dto.username,
-          bio: dto.bio ?? null
-        },
-        select: { id: true }
-      })
+      return await server.users.create(dto)
     }
   })
 
@@ -220,36 +186,7 @@ export default async (server, opts) => {
     },
     handler: async (req, reply) => {
       const dto = req.body
-
-      const userExists = await users.findFirst({
-        where: { id: dto.id },
-        select: { id: true }
-      })
-
-      if (!userExists) {
-        return reply.notFound('User not found')
-      }
-
-      const isUsernameTakenByOther = await users.findFirst({
-        where: {
-          id: { not: dto.id },
-          username: dto.username
-        },
-        select: { id: true }
-      })
-
-      if (isUsernameTakenByOther) {
-        return reply.badRequest('The username is already taken')
-      }
-
-      return await users.update({
-        where: { id: dto.id },
-        data: {
-          username: dto.username,
-          bio: dto.bio
-        },
-        select: { id: true }
-      })
+      return await server.users.update(dto)
     }
   })
 }

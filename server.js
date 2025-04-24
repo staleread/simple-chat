@@ -9,6 +9,7 @@ export default async (server, opts) => {
   })
 
   server.register(autoload, {
-    dir: path.join(__dirname, 'routes')
+    dir: path.join(__dirname, 'routes'),
+    autoHooks: true
   })
 }
