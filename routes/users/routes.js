@@ -1,6 +1,4 @@
 export default async (server, opts) => {
-  const users = server.prisma.user
-
   server.addSchema({
     $id: 'User',
     type: 'object',
