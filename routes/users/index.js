@@ -1,4 +1,6 @@
 export default async (server, opts) => {
+  const users = server.prisma.user
+
   server.addSchema({
     $id: 'User',
     type: 'object',
@@ -40,7 +42,7 @@ export default async (server, opts) => {
       },
       response: {
         200: {
-          description: 'Successful response',
+          description: 'Filtered list of users',
           type: 'array',
           items: { $ref: 'User' }
         }
@@ -57,7 +59,7 @@ export default async (server, opts) => {
       if (usernameLike) {
         where.username = { contains: usernameLike }
       }
-      return await server.prisma.user.findMany({ where })
+      return await users.findMany({ where })
     }
   })
 
@@ -79,11 +81,11 @@ export default async (server, opts) => {
       },
       response: {
         200: {
-          description: 'Successful response',
+          description: 'User info',
           $ref: 'User'
         },
         404: {
-          description: 'Error response',
+          description: 'User not found',
           $ref: 'HttpError'
         }
       }
@@ -91,7 +93,7 @@ export default async (server, opts) => {
     handler: async (req, reply) => {
       const { userId } = req.params
 
-      const user = await server.prisma.user.findUnique({
+      const user = await users.findUnique({
         where: { id: userId }
       })
 
@@ -130,15 +132,15 @@ export default async (server, opts) => {
           description: 'Successful response',
           type: 'object',
           properties: {
-            userId: {
+            id: {
               type: 'integer',
               minimum: 1
             }
           },
-          required: ['userId']
+          required: ['id']
         },
         400: {
-          description: 'Error response',
+          description: 'Username is already taken',
           $ref: 'HttpError'
         }
       }
@@ -146,26 +148,108 @@ export default async (server, opts) => {
     handler: async (req, reply) => {
       const dto = req.body
 
-      const usersWithUsernameCount = await server.prisma.user.count({
-        where: {
-          username: dto.username
-        }
+      const usesrnameIsTaken = await users.findFirst({
+        where: { username: dto.username },
+        select: { id: true }
       })
 
-      if (usersWithUsernameCount) {
+      if (usesrnameIsTaken) {
         return reply.badRequest('The username is already taken')
       }
 
-      const { id } = await server.prisma.user.create({
+      reply.code(201)
+
+      return await users.create({
         data: {
           username: dto.username,
           bio: dto.bio ?? null
         },
         select: { id: true }
       })
+    }
+  })
 
-      reply.code(201)
-      return { userId: id }
+  server.addSchema({
+    $id: 'UserUpdate',
+    type: 'object',
+    properties: {
+      id: {
+        type: 'integer',
+        minimum: 1
+      },
+      username: {
+        type: 'string',
+        minLength: 2,
+        maxLength: 30
+      },
+      bio: {
+        type: ['string', 'null']
+      }
+    },
+    required: ['id', 'username', 'bio']
+  })
+
+  server.route({
+    method: 'PUT',
+    url: '/',
+    schema: {
+      description: 'Update existent user',
+      tags: ['Users'],
+      body: { $ref: 'UserUpdate' },
+      response: {
+        200: {
+          description: 'Empty object indication success',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              minimum: 1
+            }
+          },
+          required: ['id']
+        },
+        400: {
+          description: 'Updated username is taken by other user',
+          $ref: 'HttpError'
+        },
+        404: {
+          description: 'User not found',
+          $ref: 'HttpError'
+        }
+      }
+    },
+    handler: async (req, reply) => {
+      const dto = req.body
+
+      const userExists = await users.findFirst({
+        where: { id: dto.id },
+        select: { id: true }
+      })
+
+      if (!userExists) {
+        return reply.notFound('User not found')
+      }
+
+      const isUsernameTakenByOther = await users.findFirst({
+        where: {
+          id: { not: dto.id },
+          username: dto.username
+        },
+        select: { id: true }
+      })
+
+      if (isUsernameTakenByOther) {
+        return reply.badRequest('The username is already taken')
+      }
+
+      return await users.update({
+        where: { id: dto.id },
+        data: {
+          username: dto.username,
+          bio: dto.bio
+        },
+        select: { id: true }
+      })
     }
   })
 }
