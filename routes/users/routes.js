@@ -53,20 +53,11 @@ export default async (server, opts) => {
 
   server.route({
     method: 'GET',
-    url: '/:userId',
+    url: '/:id',
     schema: {
       description: 'Get user by ID',
       tags: ['Users'],
-      params: {
-        type: 'object',
-        properties: {
-          userId: {
-            description: 'User ID',
-            type: 'integer',
-            minimum: 1
-          }
-        }
-      },
+      params: { $ref: 'UserId' },
       response: {
         200: {
           description: 'User info',
@@ -79,8 +70,8 @@ export default async (server, opts) => {
       }
     },
     handler: async (req, reply) => {
-      const { userId } = req.params
-      return await server.users.get(userId)
+      const { id } = req.params
+      return await server.users.get(id)
     }
   })
 
@@ -100,9 +91,21 @@ export default async (server, opts) => {
     required: ['username']
   })
 
+  server.addSchema({
+    $id: 'UserId',
+    type: 'object',
+    properties: {
+      id: {
+        type: 'integer',
+        minimum: 1
+      }
+    },
+    required: ['id']
+  })
+
   server.route({
     method: 'POST',
-    url: '/',
+    url: '/:id',
     schema: {
       description: 'Create new user',
       tags: ['Users'],
@@ -110,14 +113,7 @@ export default async (server, opts) => {
       response: {
         201: {
           description: 'Successful response',
-          type: 'object',
-          properties: {
-            id: {
-              type: 'integer',
-              minimum: 1
-            }
-          },
-          required: ['id']
+          $ref: 'UserId'
         },
         400: {
           description: 'Username is already taken',
@@ -162,15 +158,8 @@ export default async (server, opts) => {
       body: { $ref: 'UserUpdate' },
       response: {
         200: {
-          description: 'Empty object indication success',
-          type: 'object',
-          properties: {
-            id: {
-              type: 'integer',
-              minimum: 1
-            }
-          },
-          required: ['id']
+          description: 'Successful response',
+          $ref: 'UserId'
         },
         400: {
           description: 'Updated username is taken by other user',
@@ -185,6 +174,30 @@ export default async (server, opts) => {
     handler: async (req, reply) => {
       const dto = req.body
       return await server.users.update(dto)
+    }
+  })
+
+  server.route({
+    method: 'DELETE',
+    url: '/:id',
+    schema: {
+      description: 'Delete existent user',
+      tags: ['Users'],
+      params: { $ref: 'UserId' },
+      response: {
+        200: {
+          description: 'Successful response',
+          $ref: 'UserId'
+        },
+        404: {
+          description: 'User not found',
+          $ref: 'HttpError'
+        }
+      }
+    },
+    handler: async (req, reply) => {
+      const { id } = req.params
+      return await server.users.delete(id)
     }
   })
 }

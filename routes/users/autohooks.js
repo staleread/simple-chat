@@ -14,9 +14,9 @@ export default async (server, opts) => {
       }
       return await users.findMany({ where })
     },
-    get: async userId => {
+    get: async id => {
       const user = await users.findUnique({
-        where: { id: userId }
+        where: { id }
       })
 
       if (!user) {
@@ -70,6 +70,21 @@ export default async (server, opts) => {
           username: dto.username,
           bio: dto.bio
         },
+        select: { id: true }
+      })
+    },
+    delete: async id => {
+      const userExists = await users.findFirst({
+        where: { id },
+        select: { id: true }
+      })
+
+      if (!userExists) {
+        throw server.httpErrors.notFound('User not found')
+      }
+
+      return await users.delete({
+        where: { id },
         select: { id: true }
       })
     }
