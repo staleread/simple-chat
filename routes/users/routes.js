@@ -1,4 +1,6 @@
-export default async (server, opts) => {
+import fp from 'fastify-plugin'
+
+export default fp(async (server, opts) => {
   server.addSchema({
     $id: 'UserInfo',
     type: 'object',
@@ -14,6 +16,9 @@ export default async (server, opts) => {
       },
       bio: {
         type: ['string', 'null']
+      },
+      role: {
+        enum: ['ADMIN', 'REGULAR']
       }
     },
     required: ['id', 'username', 'bio']
@@ -74,13 +79,7 @@ export default async (server, opts) => {
         },
         404: {
           description: 'User not found',
-          type: 'object',
-          properties: {
-            statusCode: { const: 404 },
-            error: { const: 'Not Found' },
-            message: { const: 'User not found' }
-          },
-          required: ['statusCode', 'error', 'message']
+          $ref: 'HttpError'
         }
       }
     },
@@ -91,7 +90,7 @@ export default async (server, opts) => {
   })
 
   server.addSchema({
-    $id: 'UserCreate',
+    $id: 'UserRegister',
     type: 'object',
     properties: {
       username: {
@@ -101,32 +100,31 @@ export default async (server, opts) => {
       },
       bio: {
         type: ['string']
+      },
+      password: {
+        type: 'string',
+        minLength: 4,
+        maxLength: 128
       }
     },
-    required: ['username']
+    required: ['username', 'password']
   })
 
   server.route({
     method: 'POST',
-    url: '/',
+    url: '/register',
     schema: {
-      description: 'Create new user',
+      description: 'Register new user',
       tags: ['Users'],
-      body: { $ref: 'UserCreate' },
+      body: { $ref: 'UserRegister' },
       response: {
         201: {
           description: 'User Info',
           $ref: 'UserInfo'
         },
         400: {
-          description: 'Username is already taken',
-          type: 'object',
-          properties: {
-            statusCode: { const: 400 },
-            error: { const: 'Bad Request' },
-            message: { const: 'Username is already taken' }
-          },
-          required: ['statusCode', 'error', 'message']
+          description: 'Validation error',
+          $ref: 'HttpError'
         }
       }
     },
@@ -134,7 +132,7 @@ export default async (server, opts) => {
       const dto = req.body
 
       reply.code(201)
-      return await server.users.create(dto)
+      return await server.users.register(dto)
     }
   })
 
@@ -171,24 +169,12 @@ export default async (server, opts) => {
           $ref: 'UserInfo'
         },
         400: {
-          description: 'Username is taken by other user',
-          type: 'object',
-          properties: {
-            statusCode: { const: 400 },
-            error: { const: 'Bad Request' },
-            message: { const: 'Username is taken by other user' }
-          },
-          required: ['statusCode', 'error', 'message']
+          description: 'Validation error',
+          $ref: 'HttpError'
         },
         404: {
           description: 'User not found',
-          type: 'object',
-          properties: {
-            statusCode: { const: 404 },
-            error: { const: 'Not Found' },
-            message: { const: 'User not found' }
-          },
-          required: ['statusCode', 'error', 'message']
+          $ref: 'HttpError'
         }
       }
     },
@@ -222,13 +208,7 @@ export default async (server, opts) => {
         },
         404: {
           description: 'User not found',
-          type: 'object',
-          properties: {
-            statusCode: { const: 404 },
-            error: { const: 'Not Found' },
-            message: { const: 'User not found' }
-          },
-          required: ['statusCode', 'error', 'message']
+          $ref: 'HttpError'
         }
       }
     },
@@ -237,4 +217,4 @@ export default async (server, opts) => {
       return await server.users.delete(id)
     }
   })
-}
+})

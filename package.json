@@ -8,14 +8,16 @@
   "scripts": {
     "start": "fastify start -l info server.js",
     "dev": "fastify start -w -l info -P server.js",
-    "lint": "biome check --write --staged"
+    "lint": "biome check --write . && prisma format"
   },
   "dependencies": {
     "@fastify/autoload": "^6.0.0",
+    "@fastify/env": "^5.0.2",
     "@fastify/sensible": "^6.0.0",
     "@fastify/swagger": "^9.5.0",
     "@fastify/swagger-ui": "^5.2.2",
     "@prisma/client": "6.6.0",
+    "bcrypt": "^5.1.1",
     "fastify": "^5.0.0",
     "fastify-cli": "^7.4.0",
     "fastify-plugin": "^5.0.0",

@@ -8,8 +8,15 @@ generator client {
   output   = "../generated/prisma"
 }
 
+enum Role {
+  REGULAR
+  ADMIN
+}
+
 model User {
-  id       Int     @id @default(autoincrement())
-  username String  @unique
-  bio      String?
+  id           Int     @id @default(autoincrement())
+  username     String  @unique @db.VarChar(30)
+  passwordHash String  @db.Char(60)
+  bio          String? @db.VarChar(100)
+  role         Role    @default(REGULAR)
 }

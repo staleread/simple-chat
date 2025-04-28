@@ -24,20 +24,23 @@ export default async (server, opts) => {
       }
       return user
     },
-    create: async dto => {
-      const usesrnameIsTaken = await users.findFirst({
+    register: async dto => {
+      const isUsernameTaken = await users.findFirst({
         where: { username: dto.username },
         select: { id: true }
       })
 
-      if (usesrnameIsTaken) {
+      if (isUsernameTaken) {
         throw server.httpErrors.badRequest('Username is already taken')
       }
+
+      const passwordHash = await server.password.hash(dto.password)
 
       return await users.create({
         data: {
           username: dto.username,
-          bio: dto.bio ?? null
+          bio: dto.bio ?? null,
+          passwordHash
         }
       })
     },
