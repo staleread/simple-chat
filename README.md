@@ -1,5 +1,7 @@
 # monolith-chat
 
+Simple monolith chat app
+
 ## Setup Guide
 
 ### Init DB
@@ -8,10 +10,10 @@ Run PostgreSQL Docker container:
 
 ```
 docker run \
---name simple-chat-db \
--e POSTGRES_USER=mykola \
--e POSTGRES_PASSWORD=1234 \
--e POSTGRES_DB=simple-chat-db \
+--name chat-db \
+-e POSTGRES_USER=username \
+-e POSTGRES_PASSWORD=password \
+-e POSTGRES_DB=chat-db \
 -p 5432:5432 \
 -d postgres
 ```
@@ -21,7 +23,7 @@ docker run \
 Set datasource environment variable in `.env` file:
 
 ```
-DATABASE_URL="postgresql://mykola:1234@localhost:5432/simple-chat-db"
+DATABASE_URL="postgresql://username:password@localhost:5432/chat-db"
 ```
 
 Install dependencies:
