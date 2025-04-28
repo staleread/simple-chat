@@ -105,7 +105,7 @@ export default async (server, opts) => {
 
   server.route({
     method: 'POST',
-    url: '/:id',
+    url: '/',
     schema: {
       description: 'Create new user',
       tags: ['Users'],
