@@ -1,4 +1,4 @@
-# simple-chat
+# monolith-chat
 
 ## Setup Guide
 

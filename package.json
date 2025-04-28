@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "simple-chat",
+  "name": "monolith-chat",
   "version": "1.0.0",
   "main": "server.js",
   "author": "Mykola Ratushniak",
