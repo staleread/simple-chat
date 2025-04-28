@@ -1,6 +1,6 @@
 export default async (server, opts) => {
   server.addSchema({
-    $id: 'User',
+    $id: 'UserInfo',
     type: 'object',
     properties: {
       id: {
@@ -42,7 +42,7 @@ export default async (server, opts) => {
         200: {
           description: 'Filtered list of users',
           type: 'array',
-          items: { $ref: 'User' }
+          items: { $ref: 'UserInfo' }
         }
       }
     },
@@ -57,15 +57,30 @@ export default async (server, opts) => {
     schema: {
       description: 'Get user by ID',
       tags: ['Users'],
-      params: { $ref: 'UserId' },
+      params: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'integer',
+            minimum: 1
+          }
+        },
+        required: ['id']
+      },
       response: {
         200: {
           description: 'User info',
-          $ref: 'User'
+          $ref: 'UserInfo'
         },
         404: {
           description: 'User not found',
-          $ref: 'HttpError'
+          type: 'object',
+          properties: {
+            statusCode: { const: 404 },
+            error: { const: 'Not Found' },
+            message: { const: 'User not found' }
+          },
+          required: ['statusCode', 'error', 'message']
         }
       }
     },
@@ -91,18 +106,6 @@ export default async (server, opts) => {
     required: ['username']
   })
 
-  server.addSchema({
-    $id: 'UserId',
-    type: 'object',
-    properties: {
-      id: {
-        type: 'integer',
-        minimum: 1
-      }
-    },
-    required: ['id']
-  })
-
   server.route({
     method: 'POST',
     url: '/',
@@ -112,12 +115,18 @@ export default async (server, opts) => {
       body: { $ref: 'UserCreate' },
       response: {
         201: {
-          description: 'Successful response',
-          $ref: 'UserId'
+          description: 'User Info',
+          $ref: 'UserInfo'
         },
         400: {
           description: 'Username is already taken',
-          $ref: 'HttpError'
+          type: 'object',
+          properties: {
+            statusCode: { const: 400 },
+            error: { const: 'Bad Request' },
+            message: { const: 'Username is already taken' }
+          },
+          required: ['statusCode', 'error', 'message']
         }
       }
     },
@@ -158,16 +167,28 @@ export default async (server, opts) => {
       body: { $ref: 'UserUpdate' },
       response: {
         200: {
-          description: 'Successful response',
-          $ref: 'UserId'
+          description: 'Updated user Info',
+          $ref: 'UserInfo'
         },
         400: {
-          description: 'Updated username is taken by other user',
-          $ref: 'HttpError'
+          description: 'Username is taken by other user',
+          type: 'object',
+          properties: {
+            statusCode: { const: 400 },
+            error: { const: 'Bad Request' },
+            message: { const: 'Username is taken by other user' }
+          },
+          required: ['statusCode', 'error', 'message']
         },
         404: {
           description: 'User not found',
-          $ref: 'HttpError'
+          type: 'object',
+          properties: {
+            statusCode: { const: 404 },
+            error: { const: 'Not Found' },
+            message: { const: 'User not found' }
+          },
+          required: ['statusCode', 'error', 'message']
         }
       }
     },
@@ -183,15 +204,31 @@ export default async (server, opts) => {
     schema: {
       description: 'Delete existent user',
       tags: ['Users'],
-      params: { $ref: 'UserId' },
+      params: {
+        type: 'object',
+        properties: {
+          id: {
+            description: 'User id',
+            type: 'integer',
+            minimum: 1
+          }
+        },
+        required: ['id']
+      },
       response: {
         200: {
           description: 'Successful response',
-          $ref: 'UserId'
+          const: ''
         },
         404: {
           description: 'User not found',
-          $ref: 'HttpError'
+          type: 'object',
+          properties: {
+            statusCode: { const: 404 },
+            error: { const: 'Not Found' },
+            message: { const: 'User not found' }
+          },
+          required: ['statusCode', 'error', 'message']
         }
       }
     },

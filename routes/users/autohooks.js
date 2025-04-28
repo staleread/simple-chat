@@ -31,15 +31,14 @@ export default async (server, opts) => {
       })
 
       if (usesrnameIsTaken) {
-        throw server.httpErrors.badRequest('The username is already taken')
+        throw server.httpErrors.badRequest('Username is already taken')
       }
 
       return await users.create({
         data: {
           username: dto.username,
           bio: dto.bio ?? null
-        },
-        select: { id: true }
+        }
       })
     },
     update: async dto => {
@@ -61,7 +60,7 @@ export default async (server, opts) => {
       })
 
       if (isUsernameTakenByOther) {
-        throw server.httpErrors.badRequest('The username is already taken')
+        throw server.httpErrors.badRequest('Username is taken by other user')
       }
 
       return await users.update({
@@ -69,8 +68,7 @@ export default async (server, opts) => {
         data: {
           username: dto.username,
           bio: dto.bio
-        },
-        select: { id: true }
+        }
       })
     },
     delete: async id => {
