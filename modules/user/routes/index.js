@@ -109,7 +109,7 @@ export default async server => {
       },
       response: {
         201: {
-          description: 'User Info',
+          description: 'User info',
           $ref: 'UserInfo'
         },
         400: {
@@ -174,7 +174,7 @@ export default async server => {
   })
 
   server.route({
-    method: 'PUT',
+    method: 'PATCH',
     url: '/',
     schema: {
       description: 'Update user info',
@@ -191,12 +191,11 @@ export default async server => {
           bio: {
             type: ['string', 'null']
           }
-        },
-        required: ['username', 'bio']
+        }
       },
       response: {
         200: {
-          description: 'Updated user Info',
+          description: 'Updated user info',
           $ref: 'UserInfo'
         },
         400: {
@@ -213,6 +212,50 @@ export default async server => {
     handler: async (req, reply) => {
       const dto = { ...req.body, id: req.user.id }
       return await server.updateUser(dto)
+    }
+  })
+
+  server.route({
+    method: 'PATCH',
+    url: '/password',
+    schema: {
+      description: 'Reset user password',
+      tags: ['User'],
+      security: [{ BearerAuth: [] }],
+      body: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'integer',
+            minimum: 1
+          },
+          newPassword: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 30
+          }
+        },
+        required: ['id', 'newPassword']
+      },
+      response: {
+        200: {
+          description: 'Updated user info',
+          const: ''
+        },
+        400: {
+          description: 'Validation error',
+          $ref: 'HttpError'
+        },
+        404: {
+          description: 'User not found',
+          $ref: 'HttpError'
+        }
+      }
+    },
+    onRequest: [server.authenticate, server.authorize('ADMIN')],
+    handler: async (req, reply) => {
+      const dto = req.body
+      return await server.resetUserPassword(dto)
     }
   })
 

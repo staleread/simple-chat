@@ -1,6 +1,13 @@
 export default async server => {
   const users = server.prisma.user
 
+  const userInfoSelect = {
+    id: true,
+    username: true,
+    bio: true,
+    role: true
+  }
+
   server.decorate('filterUsers', async ({ hasBio, usernameLike }) => {
     const where = {}
 
@@ -13,24 +20,14 @@ export default async server => {
     }
     return await users.findMany({
       where,
-      select: {
-        id: true,
-        username: true,
-        bio: true,
-        role: true
-      }
+      select: userInfoSelect
     })
   })
 
   server.decorate('getUser', async id => {
     const user = await users.findUnique({
       where: { id },
-      select: {
-        id: true,
-        username: true,
-        bio: true,
-        role: true
-      }
+      select: userInfoSelect
     })
 
     if (!user) {
@@ -58,12 +55,7 @@ export default async server => {
         role: dto.role,
         passwordHash
       },
-      select: {
-        id: true,
-        username: true,
-        bio: true,
-        role: true
-      }
+      select: userInfoSelect
     })
   })
 
@@ -92,6 +84,11 @@ export default async server => {
   })
 
   server.decorate('updateUser', async dto => {
+    const isOnlyIdPresent = Object.keys(dto).length < 2
+
+    if (isOnlyIdPresent) {
+      throw server.httpErrors.badRequest('No fields to update were specified')
+    }
     const userExists = await users.findUnique({
       where: { id: dto.id },
       select: { id: true }
@@ -119,12 +116,26 @@ export default async server => {
         username: dto.username,
         bio: dto.bio
       },
-      select: {
-        id: true,
-        username: true,
-        bio: true,
-        role: true
-      }
+      select: userInfoSelect
+    })
+  })
+
+  server.decorate('resetUserPassword', async dto => {
+    const userExists = await users.findUnique({
+      where: { id: dto.id },
+      select: { id: true }
+    })
+
+    if (!userExists) {
+      throw server.httpErrors.notFound('User not found')
+    }
+
+    const passwordHash = await server.hash(dto.newPassword)
+
+    await users.update({
+      where: { id: dto.id },
+      data: { passwordHash },
+      select: userInfoSelect
     })
   })
 
