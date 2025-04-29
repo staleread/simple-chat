@@ -58,21 +58,11 @@ export default async server => {
 
   server.route({
     method: 'GET',
-    url: '/:id',
+    url: '/me',
     schema: {
-      description: 'Get user by ID',
+      description: 'Get current user info',
       tags: ['User'],
       security: [{ BearerAuth: [] }],
-      params: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'integer',
-            minimum: 1
-          }
-        },
-        required: ['id']
-      },
       response: {
         200: {
           description: 'User info',
@@ -86,8 +76,7 @@ export default async server => {
     },
     onRequest: [server.authenticate],
     handler: async (req, reply) => {
-      const { id } = req.params
-      return await server.getUser(id)
+      return await server.getUser(req.user.id)
     }
   })
 
@@ -97,6 +86,7 @@ export default async server => {
     schema: {
       description: 'Register new user',
       tags: ['User'],
+      security: [{ BearerAuth: [] }],
       body: {
         type: 'object',
         properties: {
@@ -112,9 +102,10 @@ export default async server => {
             type: 'string',
             minLength: 4,
             maxLength: 128
-          }
+          },
+          role: { enum: ['REGULAR', 'ADMIN'] }
         },
-        required: ['username', 'password']
+        required: ['username', 'password', 'role']
       },
       response: {
         201: {
@@ -127,6 +118,7 @@ export default async server => {
         }
       }
     },
+    onRequest: [server.authenticate, server.authorize('ADMIN')],
     handler: async (req, reply) => {
       const dto = req.body
 
@@ -185,16 +177,12 @@ export default async server => {
     method: 'PUT',
     url: '/',
     schema: {
-      description: 'Update existent user',
+      description: 'Update user info',
       tags: ['User'],
       security: [{ BearerAuth: [] }],
       body: {
         type: 'object',
         properties: {
-          id: {
-            type: 'integer',
-            minimum: 1
-          },
           username: {
             type: 'string',
             minLength: 2,
@@ -204,7 +192,7 @@ export default async server => {
             type: ['string', 'null']
           }
         },
-        required: ['id', 'username', 'bio']
+        required: ['username', 'bio']
       },
       response: {
         200: {
@@ -223,7 +211,7 @@ export default async server => {
     },
     onRequest: [server.authenticate],
     handler: async (req, reply) => {
-      const dto = req.body
+      const dto = { ...req.body, id: req.user.id }
       return await server.updateUser(dto)
     }
   })

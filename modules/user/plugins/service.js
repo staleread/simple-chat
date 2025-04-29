@@ -55,6 +55,7 @@ export default async server => {
       data: {
         username: dto.username,
         bio: dto.bio ?? null,
+        role: dto.role,
         passwordHash
       },
       select: {
