@@ -1,8 +1,19 @@
-# monolith-chat
+# simple-chat
 
-Simple monolith chat app
+Simple modular monolith chat app
 
 ## Setup Guide
+
+### Set environment variables
+
+Create `.env` file in project root folder with the following structure:
+
+```
+DATABASE_URL="postgresql://username:password@localhost:5432/chat-db"
+PASSWORD_SALT="$2b$10$exactly-22-char-salt.."
+JWT_SECRET="your-jwt-secret"
+JWT_EXPIRES_IN="15m"
+```
 
 ### Init DB
 
@@ -19,12 +30,6 @@ docker run \
 ```
 
 ### Setup Prisma ORM
-
-Set datasource environment variable in `.env` file:
-
-```
-DATABASE_URL="postgresql://username:password@localhost:5432/chat-db"
-```
 
 Install dependencies:
 
@@ -48,4 +53,12 @@ pnpm prisma db push
 
 ```
 pnpm dev
+```
+
+### Add admin user
+
+Start prisma studio and manually add a user with `ADMIN` role
+
+```
+pnpm prisma studio
 ```

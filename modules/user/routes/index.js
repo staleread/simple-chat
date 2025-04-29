@@ -1,6 +1,4 @@
-import fp from 'fastify-plugin'
-
-export default fp(async (server, opts) => {
+export default async server => {
   server.addSchema({
     $id: 'UserInfo',
     type: 'object',
@@ -29,7 +27,8 @@ export default fp(async (server, opts) => {
     url: '/',
     schema: {
       description: 'Get list of users',
-      tags: ['Users'],
+      tags: ['User'],
+      security: [{ BearerAuth: [] }],
       query: {
         type: 'object',
         properties: {
@@ -51,8 +50,9 @@ export default fp(async (server, opts) => {
         }
       }
     },
+    onRequest: [server.authenticate],
     handler: async (req, reply) => {
-      return await server.users.getAll(req.query)
+      return await server.filterUsers(req.query)
     }
   })
 
@@ -61,7 +61,8 @@ export default fp(async (server, opts) => {
     url: '/:id',
     schema: {
       description: 'Get user by ID',
-      tags: ['Users'],
+      tags: ['User'],
+      security: [{ BearerAuth: [] }],
       params: {
         type: 'object',
         properties: {
@@ -83,31 +84,11 @@ export default fp(async (server, opts) => {
         }
       }
     },
+    onRequest: [server.authenticate],
     handler: async (req, reply) => {
       const { id } = req.params
-      return await server.users.get(id)
+      return await server.getUser(id)
     }
-  })
-
-  server.addSchema({
-    $id: 'UserRegister',
-    type: 'object',
-    properties: {
-      username: {
-        type: 'string',
-        minLength: 2,
-        maxLength: 30
-      },
-      bio: {
-        type: ['string']
-      },
-      password: {
-        type: 'string',
-        minLength: 4,
-        maxLength: 128
-      }
-    },
-    required: ['username', 'password']
   })
 
   server.route({
@@ -115,8 +96,26 @@ export default fp(async (server, opts) => {
     url: '/register',
     schema: {
       description: 'Register new user',
-      tags: ['Users'],
-      body: { $ref: 'UserRegister' },
+      tags: ['User'],
+      body: {
+        type: 'object',
+        properties: {
+          username: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 30
+          },
+          bio: {
+            type: ['string']
+          },
+          password: {
+            type: 'string',
+            minLength: 4,
+            maxLength: 128
+          }
+        },
+        required: ['username', 'password']
+      },
       response: {
         201: {
           description: 'User Info',
@@ -132,28 +131,54 @@ export default fp(async (server, opts) => {
       const dto = req.body
 
       reply.code(201)
-      return await server.users.register(dto)
+      return await server.registerUser(dto)
     }
   })
 
-  server.addSchema({
-    $id: 'UserUpdate',
-    type: 'object',
-    properties: {
-      id: {
-        type: 'integer',
-        minimum: 1
+  server.route({
+    method: 'POST',
+    url: '/login',
+    schema: {
+      description: 'Login user',
+      tags: ['User'],
+      body: {
+        type: 'object',
+        properties: {
+          username: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 30
+          },
+          password: {
+            type: 'string',
+            minLength: 4,
+            maxLength: 128
+          }
+        },
+        required: ['username', 'password']
       },
-      username: {
-        type: 'string',
-        minLength: 2,
-        maxLength: 30
-      },
-      bio: {
-        type: ['string', 'null']
+      response: {
+        200: {
+          description: 'JWT token',
+          type: 'object',
+          properties: {
+            token: { type: 'string' }
+          },
+          required: ['token']
+        },
+        400: {
+          description: 'Validation error',
+          $ref: 'HttpError'
+        }
       }
     },
-    required: ['id', 'username', 'bio']
+    handler: async (req, reply) => {
+      const dto = req.body
+      const payload = await server.loginUser(dto)
+      const token = await reply.jwtSign(payload)
+
+      return { token }
+    }
   })
 
   server.route({
@@ -161,8 +186,26 @@ export default fp(async (server, opts) => {
     url: '/',
     schema: {
       description: 'Update existent user',
-      tags: ['Users'],
-      body: { $ref: 'UserUpdate' },
+      tags: ['User'],
+      security: [{ BearerAuth: [] }],
+      body: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'integer',
+            minimum: 1
+          },
+          username: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 30
+          },
+          bio: {
+            type: ['string', 'null']
+          }
+        },
+        required: ['id', 'username', 'bio']
+      },
       response: {
         200: {
           description: 'Updated user Info',
@@ -178,9 +221,10 @@ export default fp(async (server, opts) => {
         }
       }
     },
+    onRequest: [server.authenticate],
     handler: async (req, reply) => {
       const dto = req.body
-      return await server.users.update(dto)
+      return await server.updateUser(dto)
     }
   })
 
@@ -189,7 +233,8 @@ export default fp(async (server, opts) => {
     url: '/:id',
     schema: {
       description: 'Delete existent user',
-      tags: ['Users'],
+      tags: ['User'],
+      security: [{ BearerAuth: [] }],
       params: {
         type: 'object',
         properties: {
@@ -212,9 +257,10 @@ export default fp(async (server, opts) => {
         }
       }
     },
+    onRequest: [server.authenticate, server.authorize('ADMIN')],
     handler: async (req, reply) => {
       const { id } = req.params
-      return await server.users.delete(id)
+      return await server.deleteUser(id)
     }
   })
-})
+}

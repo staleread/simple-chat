@@ -1,8 +1,7 @@
 import sensible from '@fastify/sensible'
-import fp from 'fastify-plugin'
 
-export default fp(async server => {
+export default async server => {
   await server.register(sensible, {
     sharedSchemaId: 'HttpError'
   })
-})
+}

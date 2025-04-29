@@ -1,22 +1,16 @@
 import env from '@fastify/env'
-import fp from 'fastify-plugin'
 
-export default fp(
-  async (server, opts) => {
-    await server.register(env, {
-      dotenv: true,
-      schema: {
-        type: 'object',
-        properties: {
-          PASSWORD_SALT: {
-            type: 'string'
-          }
-        },
-        required: ['PASSWORD_SALT']
-      }
-    })
-  },
-  {
-    name: 'env'
-  }
-)
+export default async server => {
+  await server.register(env, {
+    dotenv: true,
+    schema: {
+      type: 'object',
+      properties: {
+        PASSWORD_SALT: { type: 'string' },
+        JWT_SECRET: { type: 'string' },
+        JWT_EXPIRES_IN: { type: 'string' }
+      },
+      required: ['PASSWORD_SALT', 'JWT_SECRET', 'JWT_EXPIRES_IN']
+    }
+  })
+}

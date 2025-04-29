@@ -1,6 +1,7 @@
 {
   "type": "module",
-  "name": "monolith-chat",
+  "name": "simple-chat",
+  "description": "Lightweight API example",
   "version": "1.0.0",
   "main": "server.js",
   "author": "Mykola Ratushniak",
@@ -13,6 +14,7 @@
   "dependencies": {
     "@fastify/autoload": "^6.0.0",
     "@fastify/env": "^5.0.2",
+    "@fastify/jwt": "^9.1.0",
     "@fastify/sensible": "^6.0.0",
     "@fastify/swagger": "^9.5.0",
     "@fastify/swagger-ui": "^5.2.2",

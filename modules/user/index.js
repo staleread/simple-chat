@@ -8,8 +8,7 @@ export default async (server, opts) => {
   })
 
   await server.register(autoload, {
-    dir: path.join(import.meta.dirname, 'modules'),
-    encapsulate: false,
-    maxDepth: 1
+    dir: path.join(import.meta.dirname, 'routes'),
+    options: { prefix: opts.prefix }
   })
 }
