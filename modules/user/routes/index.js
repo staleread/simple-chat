@@ -96,7 +96,7 @@ export default async server => {
             maxLength: 30
           },
           bio: {
-            type: ['string']
+            type: ['string', 'null']
           },
           password: {
             type: 'string',
