@@ -10,6 +10,7 @@ Create `.env` file in project root folder with the following structure:
 
 ```
 DATABASE_URL="postgresql://username:password@localhost:5432/chat-db"
+ADMIN_PASSWORD="1234"
 PASSWORD_SALT="$2b$10$exactly-22-char-salt.."
 JWT_SECRET="your-jwt-secret"
 JWT_EXPIRES_IN="15m"
@@ -37,28 +38,20 @@ Install dependencies:
 pnpm install
 ```
 
-Generate Prisma client
-
-```
-pnpm prisma generate
-```
-
-Synchronize the DB with current Prisma schema
+Synchronize the DB with current Prisma schema and generate Prisma Cient
 
 ```
 pnpm prisma db push
+```
+
+Seed the DB (add admin user)
+
+```
+pnpm prisma db seed
 ```
 
 ### Run server
 
 ```
 pnpm dev
-```
-
-### Add admin user
-
-Start prisma studio and manually add a user with `ADMIN` role
-
-```
-pnpm prisma studio
 ```
