@@ -4,54 +4,52 @@ Simple modular monolith chat app
 
 ## Setup Guide
 
-### Set environment variables
+The app consists of Node.js API and Postgres database. Here is how you can
+run both using Docker containers
 
-Create `.env` file in project root folder with the following structure:
-
-```
-DATABASE_URL="postgresql://username:password@localhost:5432/chat-db"
-ADMIN_PASSWORD="1234"
-PASSWORD_SALT="$2b$10$exactly-22-char-salt.."
-JWT_SECRET="your-jwt-secret"
-JWT_EXPIRES_IN="15m"
-```
-
-### Init DB
-
-Run PostgreSQL Docker container:
+### Create Docker bridge network
 
 ```
-docker run \
---name chat-db \
+docker network create -d bridge chat-net
+```
+
+### Run DB container
+
+```
+docker run -d --name chat-db --network chat-net -p 5432:5432 \
 -e POSTGRES_USER=username \
 -e POSTGRES_PASSWORD=password \
 -e POSTGRES_DB=chat-db \
--p 5432:5432 \
--d postgres
+postgres
 ```
 
-### Setup Prisma ORM
+### Build and run API container
 
-Install dependencies:
-
-```
-pnpm install
-```
-
-Synchronize the DB with current Prisma schema and generate Prisma Cient
+First, `cd` to project root. Create a `.env` file with the contents like this:
 
 ```
-pnpm prisma db push
+PORT=8000
+DATABASE_URL=postgresql://username:password@chat-db:5432/chat-db
+ADMIN_PASSWORD=1234
+PASSWORD_SALT=$2b$10$exactly22chars-of-salt
+JWT_SECRET=some-secret
+JWT_EXPIRES_IN=15m
 ```
 
-Seed the DB (add admin user)
+> [!IMPORTANT]
+> Ensure you are not using the quotes in that file. (See [the article](https://dev.to/tvanantwerp/don-t-quote-environment-variables-in-docker-268h))
+
+Now build the Docker image (remember, you are still in the project root folder)
 
 ```
-pnpm prisma db seed
+docker build -t chat-api .
 ```
 
-### Run server
+And finally run the container in the network
 
 ```
-pnpm dev
+docker run -d --name chat-api --network chat-net \
+-p 8000:8000 --env-file .env chat-api
 ```
+
+Checkout Swagger docs running on `http://localhost:8000/docs`
