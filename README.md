@@ -52,4 +52,4 @@ docker run -d --name chat-api --network chat-net \
 -p 8000:8000 --env-file .env chat-api
 ```
 
-Checkout Swagger docs running on `http://localhost:8000/docs`
+Checkout Swagger docs running on [http://localhost:8000/docs](http://localhost:8000/docs)
