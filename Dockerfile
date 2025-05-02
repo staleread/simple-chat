@@ -1,14 +1,18 @@
-FROM node:22-slim AS base
+FROM node:22-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
-COPY src package.json /app
-WORKDIR /app
+RUN mkdir -p /usr/bin/app/{prisma,src}
+WORKDIR /usr/bin/app
+COPY /package.json .
+COPY /src ./src
+COPY /prisma/schema.prisma ./prisma/.
 
 FROM base AS prod-deps
-COPY pnpm-* /app
+COPY /pnpm-lock.yaml /pnpm-workspace.yaml .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
 FROM base
-COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=prod-deps /usr/bin/app/node_modules ./node_modules
+RUN pnpm prisma generate
 CMD [ "pnpm", "start" ]
