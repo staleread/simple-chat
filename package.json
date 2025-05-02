@@ -7,8 +7,8 @@
   "author": "Mykola Ratushniak",
   "license": "ISC",
   "scripts": {
-    "start": "fastify start -l info server.js",
-    "dev": "fastify start -w -l info -P server.js",
+    "start": "fastify start -l info src/server.js",
+    "dev": "fastify start -w -l info -P src/server.js",
     "lint": "biome check --write . && prisma format"
   },
   "prisma": {

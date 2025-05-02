@@ -1,4 +1,4 @@
-import { PrismaClient } from '../generated/prisma/client.js'
+import { PrismaClient } from '../../prisma/client/client.js'
 
 export default async server => {
   const prisma = new PrismaClient()

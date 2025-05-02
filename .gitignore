@@ -61,5 +61,5 @@ profile*
 .env
 !.env.template
 
-# prisma
-generated/prisma
+# prisma client
+prisma/client
