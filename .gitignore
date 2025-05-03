@@ -58,8 +58,7 @@ profile*
 *flamegraph*
 
 # environment
-.env
-!.env.template
+.env*
 
 # prisma client
 prisma/client

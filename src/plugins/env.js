@@ -2,7 +2,6 @@ import env from '@fastify/env'
 
 export default async server => {
   await server.register(env, {
-    dotenv: true,
     schema: {
       type: 'object',
       properties: {

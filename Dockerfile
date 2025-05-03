@@ -1,18 +1,20 @@
 FROM node:22-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-RUN mkdir -p /usr/bin/app/{prisma,src}
+RUN corepack enable && corepack prepare pnpm@10.9.0 --activate
 WORKDIR /usr/bin/app
-COPY /package.json .
+COPY /package.json /src .
 COPY /src ./src
-COPY /prisma/schema.prisma ./prisma/.
 
-FROM base AS prod-deps
+FROM base AS deps
 COPY /pnpm-lock.yaml /pnpm-workspace.yaml .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
-FROM base
-COPY --from=prod-deps /usr/bin/app/node_modules ./node_modules
+FROM deps AS prisma
+COPY /prisma ./prisma
 RUN pnpm prisma generate
+
+FROM base
+COPY --from=deps /usr/bin/app/node_modules ./node_modules
+COPY --from=prisma /usr/bin/app/prisma ./prisma
 CMD [ "pnpm", "start" ]

@@ -6,13 +6,16 @@
   "main": "server.js",
   "author": "Mykola Ratushniak",
   "license": "ISC",
+  "packageManager": "pnpm@10.9.0",
   "scripts": {
     "start": "fastify start -l info src/server.js",
+    "docker:up": "docker-compose --env-file .env.docker up -d",
+    "docker:down": "docker-compose --env-file .env.docker down",
     "dev": "fastify start -w -l info -P src/server.js",
     "lint": "biome check --write . && prisma format"
   },
   "prisma": {
-    "seed": "node --env-file=.env prisma/seed.js"
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@fastify/autoload": "^6.0.0",
