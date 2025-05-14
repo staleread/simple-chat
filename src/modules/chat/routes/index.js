@@ -149,7 +149,7 @@ export default async server => {
         required: ['title', 'members']
       },
       response: {
-        200: {
+        201: {
           description: 'Chat details',
           $ref: 'ChatDetails'
         },
@@ -169,6 +169,7 @@ export default async server => {
     },
     onRequest: [server.authenticate, server.authorize('ADMIN')],
     handler: async (req, reply) => {
+      reply.code(201)
       return await server.createChat(req.body)
     }
   })

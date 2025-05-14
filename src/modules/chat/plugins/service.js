@@ -1,5 +1,5 @@
 export default async server => {
-  const MESSAGE_PREVIEW_LEN = 45
+  const MESSAGE_PREVIEW_LEN = 35
   const chats = server.prisma.chat
 
   const toMessagePreview = content => {
@@ -34,8 +34,8 @@ export default async server => {
     return userChats.map(chat => ({
       id: chat.id,
       title: chat.title,
-      lastMessagePreview: chat.messages.lenght
-        ? toMessagePreview(chat.messages[0])
+      lastMessagePreview: chat.messages.length
+        ? toMessagePreview(chat.messages[0].content)
         : null
     }))
   })
