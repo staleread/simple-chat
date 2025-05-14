@@ -26,12 +26,18 @@ importers:
       '@fastify/swagger-ui':
         specifier: ^5.2.2
         version: 5.2.2
+      '@fastify/view':
+        specifier: ^11.1.0
+        version: 11.1.0
       '@prisma/client':
         specifier: 6.6.0
         version: 6.6.0(prisma@6.6.0)
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1
+      eta:
+        specifier: ^3.5.0
+        version: 3.5.0
       fastify:
         specifier: ^5.0.0
         version: 5.3.2
@@ -302,6 +308,9 @@ packages:
   '@fastify/swagger@9.5.0':
     resolution: {integrity: sha512-6WiwB1Nh+GHqm4wsDGH/ym6ming3DyH9cuAkIwGN9nhbyrCoNSZ+l9h3TAsksffbNEI/RHCiw2BH2LeGNRrOoQ==}
 
+  '@fastify/view@11.1.0':
+    resolution: {integrity: sha512-ab8LG5V8srCdnknYlufaSusrjkYLYf5TUWm3DTdPFr5m1C9tI7KNl78UCcP0BJiaGaZj1udsyzAC67JCf5Ol/g==}
+
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
     engines: {node: '>=12'}
@@ -530,6 +539,10 @@ packages:
 
   escape-html@1.0.3:
     resolution: {integrity: sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==}
+
+  eta@3.5.0:
+    resolution: {integrity: sha512-e3x3FBvGzeCIHhF+zhK8FZA2vC5uFn6b4HJjegUbIWrDb4mJ7JjTGMJY9VGIbRVpmSwHopNiaJibhjIr+HfLug==}
+    engines: {node: '>=6.0.0'}
 
   fast-copy@3.0.2:
     resolution: {integrity: sha512-dl0O9Vhju8IrcLndv2eU4ldt1ftXMqqfgN4H1cpmGV7P6jeB9FwpN9a2c8DPGE1Ys88rNUJVYDHq73CGAGOPfQ==}
@@ -1283,6 +1296,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@fastify/view@11.1.0':
+    dependencies:
+      fastify-plugin: 5.0.1
+      toad-cache: 3.7.0
+
   '@isaacs/cliui@8.0.2':
     dependencies:
       string-width: 5.1.2
@@ -1529,6 +1547,8 @@ snapshots:
       '@esbuild/win32-x64': 0.25.3
 
   escape-html@1.0.3: {}
+
+  eta@3.5.0: {}
 
   fast-copy@3.0.2: {}
 
