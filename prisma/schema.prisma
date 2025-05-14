@@ -14,9 +14,27 @@ enum Role {
 }
 
 model User {
-  id           Int     @id @default(autoincrement())
-  username     String  @unique @db.VarChar(30)
-  passwordHash String  @db.Char(60)
-  bio          String? @db.VarChar(100)
-  role         Role    @default(REGULAR)
+  id           Int       @id @default(autoincrement())
+  username     String    @unique @db.VarChar(30)
+  passwordHash String    @db.Char(60)
+  bio          String?   @db.VarChar(100)
+  role         Role      @default(REGULAR)
+  chats        Chat[]
+  Message      Message[]
+}
+
+model Chat {
+  id       Int       @id @default(autoincrement())
+  title    String    @unique @db.VarChar(45)
+  users    User[]
+  messages Message[]
+}
+
+model Message {
+  id       Int    @id @default(autoincrement())
+  content  String @db.VarChar(1024)
+  sender   User   @relation(fields: [senderId], references: [id])
+  senderId Int
+  chat     Chat   @relation(fields: [chatId], references: [id])
+  chatId   Int
 }
