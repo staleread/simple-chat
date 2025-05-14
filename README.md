@@ -15,7 +15,7 @@ Setup `.env.docker` file with the template:
 DB_USER=username
 DB_PASSWORD=password
 DB_NAME=chat-db
-PASSWORD_SALT='$2b$10$exactly22chars-of-salt'
+PASSWORD_SALT='$2b$10$Base64SaltWithLenght22'
 JWT_SECRET=secret
 JWT_EXPIRES_IN=15m
 ```
