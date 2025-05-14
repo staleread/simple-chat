@@ -93,7 +93,8 @@ export default async server => {
           username: {
             type: 'string',
             minLength: 2,
-            maxLength: 30
+            maxLength: 30,
+            pattern: '^[^@]+$'
           },
           bio: {
             type: ['string', 'null']

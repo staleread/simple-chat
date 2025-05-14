@@ -19,10 +19,7 @@ export default async server => {
           }
         }
       },
-      servers: [
-        { url: 'http://localhost:8000' },
-        { url: 'http://localhost' }
-      ]
+      servers: [{ url: 'http://localhost:8000' }, { url: 'http://localhost' }]
     },
     hideUntagged: true,
     exposeRoute: true
