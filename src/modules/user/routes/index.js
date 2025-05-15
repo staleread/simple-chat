@@ -123,7 +123,7 @@ export default server => {
     onRequest: [server.authenticate],
     handler: async (req, reply) => {
       const dto = { ...req.body, id: req.user.id }
-      return await server.updateUser(dto)
+      return await userService.update(dto)
     }
   })
 

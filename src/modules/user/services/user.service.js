@@ -21,6 +21,14 @@ export default server => ({
       select: userInfoSelect
     })
   },
+  exist: async (...ids) => {
+    const existentUsers = await server.prisma.user.findMany({
+      where: { id: { in: ids } },
+      select: { id: true }
+    })
+
+    return existentUsers.length === ids.length
+  },
   get: async id => {
     const user = await server.prisma.user.findUnique({
       where: { id },

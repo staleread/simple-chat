@@ -1,10 +1,13 @@
+import userServiceFactory from '../../user/services/user.service.js'
+
 export const MESSAGE_PREVIEW_LEN = 35
+const ELLIPSIS = '...'
 
 const toMessagePreview = content => {
   if (content.length < MESSAGE_PREVIEW_LEN) {
     return content
   }
-  return `${content.substring(0, MESSAGE_PREVIEW_LEN - 3)}...`
+  return content.substring(0, MESSAGE_PREVIEW_LEN - ELLIPSIS.length) + ELLIPSIS
 }
 
 const addDays = (date, days) => {
@@ -15,6 +18,8 @@ const addDays = (date, days) => {
 }
 
 export default server => {
+  const userService = userServiceFactory(server)
+
   const checkChatAccess = async (chatId, userId) => {
     const chat = await server.prisma.chat.findFirst({
       where: {
@@ -67,7 +72,7 @@ export default server => {
         where.members = { some: { id: userId } }
       }
 
-      const chatDetails = await server.prisma.chat.findUnique({
+      const chatDetails = await server.prisma.chat.findFirst({
         where,
         select: {
           id: true,
@@ -88,34 +93,34 @@ export default server => {
       return chatDetails
     },
     create: async ({ title, members }) => {
-      const [err, chatDetails] = await server.to(
-        server.prisma.chat.create({
-          data: {
-            title: title,
-            members: {
-              connect: members.map(id => ({ id }))
-            }
-          },
-          select: {
-            id: true,
-            title: true,
-            members: {
-              select: {
-                id: true,
-                username: true
-              }
+      const allMembersExist = await userService.exist(...members)
+
+      if (!allMembersExist) {
+        throw server.httpErrors.notFound('Some members are not found')
+      }
+
+      return await server.prisma.chat.create({
+        data: {
+          title: title,
+          members: {
+            connect: members.map(id => ({ id }))
+          }
+        },
+        select: {
+          id: true,
+          title: true,
+          members: {
+            select: {
+              id: true,
+              username: true
             }
           }
-        })
-      )
-
-      if (err) throw server.httpErrors.notFound('Some members are not found')
-
-      return chatDetails
+        }
+      })
     },
     getMessages: async ({ id, fromDateStr, toDateStr, userId }) => {
       const fromDate = new Date(fromDateStr)
-      const toDate = addDays(new Date(toDateStr), 1)
+      const toDate = new Date(toDateStr)
 
       if (fromDate > toDate) {
         throw server.httpErrors.badRequest('Invalid date range')
@@ -128,7 +133,7 @@ export default server => {
           chat: { id },
           createdAt: {
             gte: fromDate,
-            lt: toDate
+            lt: addDays(toDate, 1)
           }
         },
         orderBy: {
