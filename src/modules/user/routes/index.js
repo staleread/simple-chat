@@ -1,4 +1,4 @@
-import userServiceFactory from "../services/user.service.js"
+import userServiceFactory from '../services/user.service.js'
 
 export default server => {
   const userService = userServiceFactory(server)

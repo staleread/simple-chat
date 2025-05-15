@@ -1,4 +1,7 @@
-import chatServiceFactory from "../services/chat.service.js"
+import {
+  MESSAGE_PREVIEW_LEN,
+  default as chatServiceFactory
+} from '../services/chat.service.js'
 
 export default async server => {
   const chatService = chatServiceFactory(server)
@@ -13,11 +16,11 @@ export default async server => {
       },
       title: {
         type: 'string',
-        maxLenght: 45
+        maxLength: 45
       },
       lastMessagePreview: {
         type: ['string', 'null'],
-        maxLenght: 40
+        maxLength: MESSAGE_PREVIEW_LEN
       }
     },
     required: ['id', 'title', 'lastMessagePreview']
@@ -45,7 +48,7 @@ export default async server => {
     onRequest: [server.authenticate],
     handler: async (req, reply) => {
       const { id: userId, role: userRole } = req.user
-      return await await chatService.getAll({ userId, userRole })
+      return await chatService.getAll({ userId, userRole })
     }
   })
 
@@ -59,7 +62,7 @@ export default async server => {
       },
       title: {
         type: 'string',
-        maxLenght: 45
+        maxLength: 45
       },
       members: {
         type: 'array',
@@ -269,7 +272,12 @@ export default async server => {
       const { fromDate: fromDateStr, toDate: toDateStr } = req.query
       const { id: userId } = req.user
 
-      return await chatService.getMessages({ id, fromDateStr, toDateStr, userId })
+      return await chatService.getMessages({
+        id,
+        fromDateStr,
+        toDateStr,
+        userId
+      })
     }
   })
 

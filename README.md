@@ -15,7 +15,7 @@ Setup `.env.docker` file with the template:
 DB_USER=username
 DB_PASSWORD=password
 DB_NAME=chat-db
-PASSWORD_SALT='$2b$10$Base64SaltWithLenght22'
+PASSWORD_SALT='$2b$10$Base64SaltWithLength22'
 JWT_SECRET=secret
 JWT_EXPIRES_IN=15m
 ```
@@ -57,7 +57,7 @@ Setup `.env` file with the template:
 ```
 PORT=8000
 DATABASE_URL=postgresql://username:password@localhost:5432/chat-db
-PASSWORD_SALT='$2b$10$Base64SaltWithLenght22'
+PASSWORD_SALT='$2b$10$Base64SaltWithLength22'
 JWT_SECRET=secret
 JWT_EXPIRES_IN=15m
 ```
