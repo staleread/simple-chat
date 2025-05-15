@@ -42,7 +42,7 @@ export default server => ({
       throw server.httpErrors.badRequest('Username is already taken')
     }
 
-    const passwordHash = await hash(password)
+    const passwordHash = await server.hash(password)
 
     return await server.prisma.user.create({
       data: {
