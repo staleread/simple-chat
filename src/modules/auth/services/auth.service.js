@@ -17,9 +17,9 @@ export default server => ({
 
     const isPasswordCorrect = await server.compareHash(password, passwordHash)
 
-    if (isPasswordCorrect) {
-      return { id, role }
+    if (!isPasswordCorrect) {
+      throw server.httpErrors.badRequest('Invalid credentials')
     }
-    throw server.httpErrors.badRequest('Invalid credentials')
+    return { id, role }
   }
 })
