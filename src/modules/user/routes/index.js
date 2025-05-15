@@ -1,4 +1,8 @@
-export default async server => {
+import userServiceFactory from "../services/user.service.js"
+
+export default server => {
+  const userService = userServiceFactory(server)
+
   server.addSchema({
     $id: 'UserInfo',
     type: 'object',
@@ -52,7 +56,8 @@ export default async server => {
     },
     onRequest: [server.authenticate],
     handler: async (req, reply) => {
-      return await server.filterUsers(req.query)
+      const { hasBio, usernameLike } = req.query
+      return await userService.getAll({ hasBio, usernameLike })
     }
   })
 
@@ -76,7 +81,7 @@ export default async server => {
     },
     onRequest: [server.authenticate],
     handler: async (req, reply) => {
-      return await server.getUser(req.user.id)
+      return await userService.get(req.user.id)
     }
   })
 
@@ -121,10 +126,15 @@ export default async server => {
     },
     onRequest: [server.authenticate, server.authorize('ADMIN')],
     handler: async (req, reply) => {
-      const dto = req.body
+      const { username, bio, role, password } = req.body
 
       reply.code(201)
-      return await server.registerUser(dto)
+      return await userService.register({
+        username,
+        bio,
+        role,
+        password
+      })
     }
   })
 
@@ -166,8 +176,9 @@ export default async server => {
       }
     },
     handler: async (req, reply) => {
-      const dto = req.body
-      const payload = await server.loginUser(dto)
+      const { username, password } = req.body
+
+      const payload = await userService.login({ username, password })
       const token = await reply.jwtSign(payload)
 
       return { token }
@@ -255,8 +266,8 @@ export default async server => {
     },
     onRequest: [server.authenticate, server.authorize('ADMIN')],
     handler: async (req, reply) => {
-      const dto = req.body
-      return await server.resetUserPassword(dto)
+      const { id, newPassword } = req.body
+      return await userService.resetPassword({ id, newPassword })
     }
   })
 
@@ -292,7 +303,7 @@ export default async server => {
     onRequest: [server.authenticate, server.authorize('ADMIN')],
     handler: async (req, reply) => {
       const { id } = req.params
-      return await server.deleteUser(id)
+      return await userService.delete(id)
     }
   })
 }
