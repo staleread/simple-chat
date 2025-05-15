@@ -128,50 +128,6 @@ export default server => {
   })
 
   server.route({
-    method: 'PATCH',
-    url: '/password',
-    schema: {
-      description: 'Reset user password',
-      tags: ['User'],
-      security: [{ BearerAuth: [] }],
-      body: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'integer',
-            minimum: 1
-          },
-          newPassword: {
-            type: 'string',
-            minLength: 2,
-            maxLength: 30
-          }
-        },
-        required: ['id', 'newPassword']
-      },
-      response: {
-        200: {
-          description: 'Updated user info',
-          const: ''
-        },
-        400: {
-          description: 'Validation error',
-          $ref: 'HttpError'
-        },
-        404: {
-          description: 'User not found',
-          $ref: 'HttpError'
-        }
-      }
-    },
-    onRequest: [server.authenticate, server.authorize('ADMIN')],
-    handler: async (req, reply) => {
-      const { id, newPassword } = req.body
-      return await userService.resetPassword({ id, newPassword })
-    }
-  })
-
-  server.route({
     method: 'DELETE',
     url: '/:id',
     schema: {
