@@ -32,7 +32,7 @@ export default async server => {
     schema: {
       description: 'Get chats',
       tags: ['Chat'],
-      security: [{ BearerAuth: [] }],
+      security: [{ cookieAuth: [] }],
       response: {
         200: {
           description: 'Chat previews',
@@ -92,7 +92,7 @@ export default async server => {
     schema: {
       description: 'Get chat details',
       tags: ['Chat'],
-      security: [{ BearerAuth: [] }],
+      security: [{ cookieAuth: [] }],
       params: {
         type: 'object',
         properties: {
@@ -135,7 +135,7 @@ export default async server => {
     schema: {
       description: 'Create new chat',
       tags: ['Chat'],
-      security: [{ BearerAuth: [] }],
+      security: [{ cookieAuth: [] }],
       body: {
         type: 'object',
         properties: {
@@ -225,7 +225,7 @@ export default async server => {
     schema: {
       description: 'Get chat messages for specific period',
       tags: ['Chat'],
-      security: [{ BearerAuth: [] }],
+      security: [{ cookieAuth: [] }],
       params: {
         type: 'object',
         properties: {
@@ -287,7 +287,7 @@ export default async server => {
     schema: {
       description: 'Send message to chat',
       tags: ['Chat'],
-      security: [{ BearerAuth: [] }],
+      security: [{ cookieAuth: [] }],
       params: {
         type: 'object',
         properties: {

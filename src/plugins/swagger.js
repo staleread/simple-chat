@@ -11,11 +11,11 @@ export default async server => {
       },
       components: {
         securitySchemes: {
-          BearerAuth: {
+          cookieAuth: {
             description: 'JWT with user id and role in payload',
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT'
+            type: 'apiKey',
+            in: 'cookie',
+            name: 'token'
           }
         }
       },

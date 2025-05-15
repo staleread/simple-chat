@@ -32,7 +32,7 @@ export default server => {
     schema: {
       description: 'Get list of users',
       tags: ['User'],
-      security: [{ BearerAuth: [] }],
+      security: [{ cookieAuth: [] }],
       query: {
         type: 'object',
         properties: {
@@ -67,7 +67,7 @@ export default server => {
     schema: {
       description: 'Get current user info',
       tags: ['User'],
-      security: [{ BearerAuth: [] }],
+      security: [{ cookieAuth: [] }],
       response: {
         200: {
           description: 'User info',
@@ -86,112 +86,12 @@ export default server => {
   })
 
   server.route({
-    method: 'POST',
-    url: '/register',
-    schema: {
-      description: 'Register new user',
-      tags: ['User'],
-      security: [{ BearerAuth: [] }],
-      body: {
-        type: 'object',
-        properties: {
-          username: {
-            type: 'string',
-            minLength: 2,
-            maxLength: 30,
-            pattern: '^[^@]+$'
-          },
-          bio: {
-            type: ['string', 'null']
-          },
-          password: {
-            type: 'string',
-            minLength: 4,
-            maxLength: 128
-          },
-          role: { enum: ['REGULAR', 'ADMIN'] }
-        },
-        required: ['username', 'password', 'role']
-      },
-      response: {
-        201: {
-          description: 'User info',
-          $ref: 'UserInfo'
-        },
-        400: {
-          description: 'Validation error',
-          $ref: 'HttpError'
-        }
-      }
-    },
-    onRequest: [server.authenticate, server.authorize('ADMIN')],
-    handler: async (req, reply) => {
-      const { username, bio, role, password } = req.body
-
-      reply.code(201)
-      return await userService.register({
-        username,
-        bio,
-        role,
-        password
-      })
-    }
-  })
-
-  server.route({
-    method: 'POST',
-    url: '/login',
-    schema: {
-      description: 'Login user',
-      tags: ['User'],
-      body: {
-        type: 'object',
-        properties: {
-          username: {
-            type: 'string',
-            minLength: 2,
-            maxLength: 30
-          },
-          password: {
-            type: 'string',
-            minLength: 4,
-            maxLength: 128
-          }
-        },
-        required: ['username', 'password']
-      },
-      response: {
-        200: {
-          description: 'JWT token',
-          type: 'object',
-          properties: {
-            token: { type: 'string' }
-          },
-          required: ['token']
-        },
-        400: {
-          description: 'Validation error',
-          $ref: 'HttpError'
-        }
-      }
-    },
-    handler: async (req, reply) => {
-      const { username, password } = req.body
-
-      const payload = await userService.login({ username, password })
-      const token = await reply.jwtSign(payload)
-
-      return { token }
-    }
-  })
-
-  server.route({
     method: 'PATCH',
     url: '/',
     schema: {
       description: 'Update user info',
       tags: ['User'],
-      security: [{ BearerAuth: [] }],
+      security: [{ cookieAuth: [] }],
       body: {
         type: 'object',
         properties: {
@@ -277,7 +177,7 @@ export default server => {
     schema: {
       description: 'Delete existent user',
       tags: ['User'],
-      security: [{ BearerAuth: [] }],
+      security: [{ cookieAuth: [] }],
       params: {
         type: 'object',
         properties: {

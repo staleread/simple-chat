@@ -5,6 +5,10 @@ export default async server => {
     secret: server.config.JWT_SECRET,
     sign: {
       expiresIn: server.config.JWT_EXPIRES_IN
+    },
+    cookie: {
+      cookieName: 'token',
+      signed: false
     }
   })
 
