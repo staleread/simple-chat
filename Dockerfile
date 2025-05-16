@@ -1,6 +1,8 @@
-FROM node:22-alpine AS base
+FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+RUN apt-get update
+RUN apt-get install -y openssl
 RUN corepack enable && corepack prepare pnpm@10.9.0 --activate
 WORKDIR /usr/bin/app
 COPY /package.json /src .
