@@ -37,6 +37,10 @@ export default server => {
         200: {
           description: 'Cookie with JWT token',
           type: 'object',
+          properties: {
+            success: { const: true }
+          },
+          required: ['success'],
           headers: {
             'Set-Cookie': {
               token: {
@@ -73,7 +77,7 @@ export default server => {
         path: '/',
         httpOnly: true
       })
-      return reply.redirect('/chat')
+      return { success: true }
     }
   })
 }

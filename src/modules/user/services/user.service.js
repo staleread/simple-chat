@@ -108,10 +108,7 @@ export default server => ({
       throw server.httpErrors.notFound('User not found')
     }
 
-    return await server.prisma.user.delete({
-      where: { id },
-      select: { id: true }
-    })
+    await server.prisma.user.delete({ where: { id } })
   },
   resetPassword: async ({ id, newPassword }) => {
     const userExists = await server.prisma.user.findUnique({

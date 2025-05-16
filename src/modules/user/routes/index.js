@@ -148,7 +148,11 @@ export default server => {
       response: {
         200: {
           description: 'Successful response',
-          const: ''
+          type: 'object',
+          properties: {
+            success: { const: true }
+          },
+          required: ['success']
         },
         404: {
           description: 'User not found',
@@ -159,7 +163,9 @@ export default server => {
     onRequest: [server.authenticate, server.authorize('ADMIN')],
     handler: async (req, reply) => {
       const { id } = req.params
-      return await userService.delete(id)
+      await userService.delete(id)
+
+      return { success: true }
     }
   })
 }
