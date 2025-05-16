@@ -16,6 +16,7 @@ services:
     image: staleread/chat-api
     environment:
       PORT: 8000
+      SERVER_URL: ${SERVER_URL}
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       PASSWORD_SALT: ${PASSWORD_SALT}
       JWT_SECRET: ${JWT_SECRET}
