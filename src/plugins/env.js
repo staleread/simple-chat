@@ -5,6 +5,7 @@ export default async server => {
     schema: {
       type: 'object',
       properties: {
+        SERVER_URL: { type: 'string' },
         PASSWORD_SALT: { type: 'string' },
         JWT_SECRET: { type: 'string' },
         JWT_EXPIRES_IN: { type: 'string' }
