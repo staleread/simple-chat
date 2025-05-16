@@ -122,10 +122,9 @@ export default server => ({
 
     const passwordHash = await server.hash(newPassword)
 
-    return await server.prisma.user.update({
+    await server.prisma.user.update({
       where: { id },
-      data: { passwordHash },
-      select: userInfoSelect
+      data: { passwordHash }
     })
   }
 })

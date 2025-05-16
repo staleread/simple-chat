@@ -86,6 +86,54 @@ export default server => {
   })
 
   server.route({
+    method: 'POST',
+    url: '/',
+    schema: {
+      description: 'Register new user',
+      tags: ['User'],
+      security: [{ cookieAuth: [] }],
+      body: {
+        type: 'object',
+        properties: {
+          username: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 20,
+            pattern: '^[a-zA-Z_]*[a-zA-Z0-9_]$'
+          },
+          bio: {
+            type: 'string'
+          },
+          password: {
+            type: 'string',
+            minLength: 4,
+            maxLength: 128
+          },
+          role: { enum: ['REGULAR', 'ADMIN'] }
+        },
+        required: ['username', 'password', 'role']
+      },
+      response: {
+        201: {
+          description: 'User info',
+          $ref: 'UserInfo'
+        },
+        400: {
+          description: 'Validation error',
+          $ref: 'HttpError'
+        }
+      }
+    },
+    onRequest: [server.authenticate, server.authorize('ADMIN')],
+    handler: async (req, reply) => {
+      const { username, bio, role, password } = req.body
+
+      reply.code(201)
+      return await userService.create({ username, bio, role, password })
+    }
+  })
+
+  server.route({
     method: 'PATCH',
     url: '/',
     schema: {
@@ -124,6 +172,56 @@ export default server => {
     handler: async (req, reply) => {
       const dto = { ...req.body, id: req.user.id }
       return await userService.update(dto)
+    }
+  })
+
+  server.route({
+    method: 'PATCH',
+    url: '/reset',
+    schema: {
+      description: 'Reset user password',
+      tags: ['User'],
+      security: [{ cookieAuth: [] }],
+      body: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'integer',
+            minimum: 1
+          },
+          newPassword: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 30
+          }
+        },
+        required: ['id', 'newPassword']
+      },
+      response: {
+        200: {
+          description: 'Successful response',
+          type: 'object',
+          properties: {
+            success: { const: true }
+          },
+          required: ['success']
+        },
+        400: {
+          description: 'Validation error',
+          $ref: 'HttpError'
+        },
+        404: {
+          description: 'User not found',
+          $ref: 'HttpError'
+        }
+      }
+    },
+    onRequest: [server.authenticate, server.authorize('ADMIN')],
+    handler: async (req, reply) => {
+      const { id, newPassword } = req.body
+      await userService.resetPassword({ id, newPassword })
+
+      return { success: true }
     }
   })
 
