@@ -46,18 +46,12 @@ export default server => {
           }
         }
       },
-      response: {
-        200: {
-          description: 'Filtered list of users',
-          type: 'array',
-          items: { $ref: 'UserInfo' }
-        }
-      }
     },
     onRequest: [server.authenticate],
     handler: async (req, reply) => {
       const { hasBio, usernameLike } = req.query
-      return await userService.getAll({ hasBio, usernameLike })
+      const users = await userService.getAll({ hasBio, usernameLike })
+      return await reply.viewAsync('/layouts/users-page.eta', { users })
     }
   })
 
