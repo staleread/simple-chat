@@ -17,6 +17,8 @@ services:
     environment:
       PORT: 8000
       SERVER_URL: ${SERVER_URL}
+      RATE_LIMIT: ${RATE_LIMIT}
+      RATE_LIMIT_TIME_WINDOW: ${RATE_LIMIT_TIME_WINDOW}
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       PASSWORD_SALT: ${PASSWORD_SALT}
       JWT_SECRET: ${JWT_SECRET}

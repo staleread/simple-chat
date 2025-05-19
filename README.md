@@ -16,6 +16,8 @@ DB_USER=username
 DB_PASSWORD=password
 DB_NAME=chat-db
 SERVER_URL=http://localhost:8000
+RATE_LIMIT=100
+RATE_LIMIT_TIME_WINDOW=60000
 PASSWORD_SALT='$2b$10$Base64SaltWithLength22'
 JWT_SECRET=secret
 JWT_EXPIRES_IN=15m
@@ -58,6 +60,8 @@ Setup `.env` file with the template:
 ```
 PORT=8000
 SERVER_URL=http://localhost:8000
+RATE_LIMIT=100
+RATE_LIMIT_TIME_WINDOW=60000
 DATABASE_URL=postgresql://username:password@localhost:5432/chat-db
 PASSWORD_SALT='$2b$10$Base64SaltWithLength22'
 JWT_SECRET=secret

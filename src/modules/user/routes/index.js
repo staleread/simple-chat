@@ -45,7 +45,7 @@ export default server => {
             type: 'string'
           }
         }
-      },
+      }
     },
     onRequest: [server.authenticate],
     handler: async (req, reply) => {
