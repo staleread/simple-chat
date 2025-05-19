@@ -28,9 +28,9 @@ export default server => {
 
   server.route({
     method: 'GET',
-    url: '/',
+    url: '/search',
     schema: {
-      description: 'Get list of users',
+      description: 'Search for users by creteria',
       tags: ['User'],
       security: [{ cookieAuth: [] }],
       query: {
@@ -50,7 +50,20 @@ export default server => {
     onRequest: [server.authenticate],
     handler: async (req, reply) => {
       const { hasBio, usernameLike } = req.query
-      const users = await userService.getAll({ hasBio, usernameLike })
+      return await userService.getAll({ hasBio, usernameLike })
+    }
+  })
+
+  server.route({
+    method: 'GET',
+    url: '/',
+    schema: {
+      security: [{ cookieAuth: [] }],
+    },
+    onRequest: [server.authenticate],
+    handler: async (req, reply) => {
+      const users = await server.withCache('allUsers', 10, () => userService.getAll({}))
+
       return await reply.viewAsync('/layouts/users-page.eta', { users })
     }
   })
