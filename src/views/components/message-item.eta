@@ -1,0 +1,10 @@
+<% const isOwn = it.sender.id === it.userId %>
+<li id="message-<%= it.id %>" class="flex flex-col gap-1 <%= isOwn ? 'self-end' : 'self-start' %>">
+  <% if (!isOwn) { %>
+  <span class="text-sm font-semibold text-gray-900 dark:text-white">@<%= it.sender.username %></span>
+  <% } %>
+  <div class="flex w-full max-w-[240px] flex-col rounded-xl border-gray-200 bg-gray-100 py-2.5 px-4 sm:max-w-[320px] dark:bg-gray-700">
+    <p class="text-sm font-normal text-gray-900 dark:text-white"><%= it.content %></p>
+    <span class="text-right text-xs text-gray-500 dark:text-gray-300"><%= it.relativeToNow %></span>
+  </div>
+</li>

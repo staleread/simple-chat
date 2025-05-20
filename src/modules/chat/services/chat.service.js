@@ -1,21 +1,26 @@
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime.js'
 import userServiceFactory from '../../user/services/user.service.js'
+
+dayjs.extend(relativeTime)
 
 export const MESSAGE_PREVIEW_LEN = 35
 const ELLIPSIS = '...'
 
 const toMessagePreview = content => {
+  if (!content) {
+    return 'No messages yet'
+  }
   if (content.length < MESSAGE_PREVIEW_LEN) {
     return content
   }
   return content.substring(0, MESSAGE_PREVIEW_LEN - ELLIPSIS.length) + ELLIPSIS
 }
 
-const addDays = (date, days) => {
-  const resultDate = new Date(date)
-  resultDate.setDate(resultDate.getDate() + days)
-
-  return resultDate
-}
+const toMessageDto = rawMessage => ({
+  ...rawMessage,
+  relativeToNow: dayjs().to(rawMessage.createdAt)
+})
 
 export default server => {
   const userService = userServiceFactory(server)
@@ -35,15 +40,9 @@ export default server => {
   }
 
   return {
-    getAll: async ({ userId, userRole }) => {
-      const where = {}
-
-      if (userRole !== 'ADMIN') {
-        where.members = { some: { id: userId } }
-      }
-
+    getAll: async ({ userId }) => {
       const userChats = await server.prisma.chat.findMany({
-        where,
+        where: { members: { some: { id: userId } } },
         select: {
           id: true,
           title: true,
@@ -60,9 +59,7 @@ export default server => {
       return userChats.map(chat => ({
         id: chat.id,
         title: chat.title,
-        lastMessagePreview: chat.messages.length
-          ? toMessagePreview(chat.messages[0].content)
-          : null
+        lastMessagePreview: toMessagePreview(chat.messages[0].content)
       }))
     },
     get: async ({ id, userId, userRole }) => {
@@ -118,26 +115,22 @@ export default server => {
         }
       })
     },
-    getMessages: async ({ id, fromDateStr, toDateStr, userId }) => {
-      const fromDate = new Date(fromDateStr)
-      const toDate = new Date(toDateStr)
-
-      if (fromDate > toDate) {
-        throw server.httpErrors.badRequest('Invalid date range')
+    getMessages: async ({ id, userId, after, before }) => {
+      const createdAt = {
+        gte: new Date(after)
       }
+
+      if (before) createdAt.lt = new Date(before)
 
       await checkChatAccess(id, userId)
 
       const rawMessages = await server.prisma.message.findMany({
         where: {
           chat: { id },
-          createdAt: {
-            gte: fromDate,
-            lt: addDays(toDate, 1)
-          }
+          createdAt
         },
         orderBy: {
-          createdAt: 'asc'
+          createdAt: 'desc'
         },
         select: {
           id: true,
@@ -152,12 +145,33 @@ export default server => {
         }
       })
 
-      return rawMessages.map(message => ({
-        ...message,
-        createdAt: message.createdAt.toJSON()
-      }))
+      return rawMessages.map(toMessageDto).reverse()
     },
-    sendMessage: async ({ id, content, userId }) => {
+    getLastMessages: async ({ id, userId, count }) => {
+      await checkChatAccess(id, userId)
+
+      const rawMessages = await server.prisma.message.findMany({
+        take: count,
+        where: { chat: { id } },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          sender: {
+            select: {
+              id: true,
+              username: true
+            }
+          }
+        }
+      })
+
+      return rawMessages.map(toMessageDto).reverse()
+    },
+    addMessage: async ({ id, content, userId }) => {
       await checkChatAccess(id, userId)
 
       const message = await server.prisma.message.create({
@@ -179,10 +193,7 @@ export default server => {
         }
       })
 
-      return {
-        ...message,
-        createdAt: message.createdAt.toJSON()
-      }
+      return toMessageDto(message)
     }
   }
 }

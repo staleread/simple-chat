@@ -3,6 +3,22 @@ import userServiceFactory from '../services/user.service.js'
 export default server => {
   const userService = userServiceFactory(server)
 
+  server.route({
+    method: 'GET',
+    url: '/',
+    schema: {
+      security: [{ cookieAuth: [] }]
+    },
+    onRequest: [server.authenticate],
+    handler: async (req, reply) => {
+      const users = await server.withCache('allUsers', 10, () =>
+        userService.getAll({})
+      )
+
+      return await reply.viewAsync('layouts/users-page.eta', { users })
+    }
+  })
+
   server.addSchema({
     $id: 'UserInfo',
     type: 'object',
@@ -51,20 +67,6 @@ export default server => {
     handler: async (req, reply) => {
       const { hasBio, usernameLike } = req.query
       return await userService.getAll({ hasBio, usernameLike })
-    }
-  })
-
-  server.route({
-    method: 'GET',
-    url: '/',
-    schema: {
-      security: [{ cookieAuth: [] }],
-    },
-    onRequest: [server.authenticate],
-    handler: async (req, reply) => {
-      const users = await server.withCache('allUsers', 10, () => userService.getAll({}))
-
-      return await reply.viewAsync('/layouts/users-page.eta', { users })
     }
   })
 

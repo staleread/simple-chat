@@ -6,9 +6,7 @@ export default server => {
   server.route({
     method: 'GET',
     url: '/login',
-    handler: async (req, reply) => {
-      return await reply.viewAsync('layouts/login-page.eta')
-    }
+    handler: (req, reply) => reply.viewAsync('layouts/login-page.eta')
   })
 
   server.route({
@@ -32,27 +30,6 @@ export default server => {
           }
         },
         required: ['username', 'password']
-      },
-      response: {
-        200: {
-          description: 'Cookie with JWT token',
-          type: 'object',
-          properties: {
-            success: { const: true }
-          },
-          required: ['success'],
-          headers: {
-            'Set-Cookie': {
-              token: {
-                type: 'string'
-              }
-            }
-          }
-        },
-        400: {
-          description: 'Validation error',
-          $ref: 'HttpError'
-        }
       }
     },
     attachValidation: true,
@@ -77,7 +54,7 @@ export default server => {
         path: '/',
         httpOnly: true
       })
-      return { success: true }
+      return reply.redirect('/chat/')
     }
   })
 }

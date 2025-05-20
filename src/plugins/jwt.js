@@ -16,7 +16,7 @@ export default async server => {
     try {
       await req.jwtVerify()
     } catch (err) {
-      reply.send(err)
+      reply.redirect('/auth/login')
     }
   })
 
