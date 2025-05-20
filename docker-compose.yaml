@@ -12,8 +12,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  cache:
+    image: redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   api:
-    image: staleread/chat-api
+    image: staleread/chat-api:2.0.0
     environment:
       PORT: 8000
       SERVER_URL: ${SERVER_URL}
@@ -28,4 +37,6 @@ services:
       - 8000:8000
     depends_on:
       db:
+        condition: service_healthy
+      cache:
         condition: service_healthy

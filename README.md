@@ -15,6 +15,7 @@ Setup `.env.docker` file with the template:
 DB_USER=username
 DB_PASSWORD=password
 DB_NAME=chat-db
+REDIS_URL=redis://localhost
 SERVER_URL=http://localhost:8000
 RATE_LIMIT=100
 RATE_LIMIT_TIME_WINDOW=60000
@@ -37,9 +38,9 @@ And then to delete the containers
 pnpm docker:down
 ```
 
-### 2. As Node.js app with DB Docker container
+### 2. As Node.js app with Postgres and Redis Docker containers
 
-Run DB container
+Run `postgres` container
 
 ```
 docker run -d --name chat-db -p 5432:5432 \
@@ -55,6 +56,12 @@ Generate Prisma client
 pnpm prisma generate
 ```
 
+Run `redis` container
+
+```
+docker run -d --name chat-cache -p 6379:6379 redis
+```
+
 Setup `.env` file with the template:
 
 ```
@@ -62,6 +69,7 @@ PORT=8000
 SERVER_URL=http://localhost:8000
 RATE_LIMIT=100
 RATE_LIMIT_TIME_WINDOW=60000
+REDIS_URL=redis://localhost
 DATABASE_URL=postgresql://username:password@localhost:5432/chat-db
 PASSWORD_SALT='$2b$10$Base64SaltWithLength22'
 JWT_SECRET=secret
