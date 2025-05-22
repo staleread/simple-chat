@@ -56,14 +56,12 @@ export default server => {
         }
       })
 
-      const lastMessagePreview = toMessagePreview(
-        chat.messages[0]?.content ?? 'No messages yet'
-      )
-
       return userChats.map(chat => ({
         id: chat.id,
         title: chat.title,
-        lastMessagePreview
+        lastMessagePreview: toMessagePreview(
+          chat.messages[0]?.content ?? 'No messages yet'
+        )
       }))
     },
     get: async ({ id, userId, userRole }) => {

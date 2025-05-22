@@ -1,42 +1,40 @@
 name: simple-chat
 
 services:
-  db:
+  app:
+    container_name: chat-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}"
+    env_file: .env.docker
+    ports:
+      - 8000:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    container_name: chat-postgres
     image: postgres
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${DB_NAME}"]
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  cache:
+  redis:
+    container_name: chat-redis
     image: redis
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
-
-  api:
-    image: staleread/chat-api:2.0.0
-    environment:
-      PORT: 8000
-      SERVER_URL: ${SERVER_URL}
-      RATE_LIMIT: ${RATE_LIMIT}
-      RATE_LIMIT_TIME_WINDOW: ${RATE_LIMIT_TIME_WINDOW}
-      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      REDIS_URL: ${REDIS_URL}
-      PASSWORD_SALT: ${PASSWORD_SALT}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
-    ports:
-      - 8000:8000
-    depends_on:
-      db:
-        condition: service_healthy
-      cache:
-        condition: service_healthy

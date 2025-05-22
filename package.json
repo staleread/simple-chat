@@ -9,8 +9,9 @@
   "packageManager": "pnpm@10.9.0",
   "scripts": {
     "start": "fastify start -l info src/server.js",
-    "docker:up": "docker-compose --env-file .env.docker up -d",
+    "docker:up": "docker-compose --env-file .env.docker up",
     "docker:down": "docker-compose --env-file .env.docker down",
+    "db:deploy": "pnpm prisma migrate deploy && pnpm prisma db seed",
     "dev": "fastify start -w -l info -P src/server.js",
     "debug": "fastify start -w -d -l debug -P src/server.js",
     "lint": "biome check --write . && prisma format"

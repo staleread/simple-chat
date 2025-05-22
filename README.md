@@ -2,21 +2,21 @@
 
 Simple modular monolith chat app
 
-## Setup Guides
+## Setup Guide
 
-The app consists of Node.js API and Postgres database. Here are some ways
-how you can run them
+The app consists of a Node.js Fastify API, a PostgreSQL database, and a Redis cache. You can run it in two main ways:
 
 ### 1. Using Docker Compose
 
-Setup `.env.docker` file with the template:
+Create a `.env.docker` file using the following template:
 
 ```
-DB_USER=username
-DB_PASSWORD=password
-DB_NAME=chat-db
-REDIS_URL=redis://localhost
+POSTGRES_USER=username
+POSTGRES_PASSWORD=password
+POSTGRES_DB=chat-db
 SERVER_URL=http://localhost:8000
+REDIS_URL=redis://chat-redis
+ADMIN_PASSWORD=admin
 RATE_LIMIT=100
 RATE_LIMIT_TIME_WINDOW=60000
 PASSWORD_SALT='$2b$10$Base64SaltWithLength22'
@@ -24,45 +24,41 @@ JWT_SECRET=secret
 JWT_EXPIRES_IN=15m
 ```
 
-Just run in project root folder
+To start the services:
 
 ```
 pnpm docker:up
 ```
 
-Checkout Swagger docs running on [http://localhost:8000/docs](http://localhost:8000/docs)
-
-And then to delete the containers
+To stop them:
 
 ```
 pnpm docker:down
 ```
 
-### 2. As Node.js app with Postgres and Redis Docker containers
+Swagger docs will be available at [http://localhost:8000/docs](http://localhost:8000/docs)
 
-Run `postgres` container
+### 2. Local Development with Dockerized Databases
 
-```
-docker run -d --name chat-db -p 5432:5432 \
--e POSTGRES_USER=username \
--e POSTGRES_PASSWORD=password \
--e POSTGRES_DB=chat-db \
-postgres
-```
+If you prefer to run only the API locally and use Docker for the database/cache:
 
-Generate Prisma client
+Start PostgreSQL:
 
 ```
-pnpm prisma generate
+docker run -d --name chat-postgres -p 5432:5432 \
+  -e POSTGRES_USER=username \
+  -e POSTGRES_PASSWORD=password \
+  -e POSTGRES_DB=chat-db \
+  postgres
 ```
 
-Run `redis` container
+Start Redis:
 
 ```
-docker run -d --name chat-cache -p 6379:6379 redis
+docker run -d --name chat-redis -p 6379:6379 redis
 ```
 
-Setup `.env` file with the template:
+Create a .env file:
 
 ```
 PORT=8000
@@ -70,16 +66,23 @@ SERVER_URL=http://localhost:8000
 RATE_LIMIT=100
 RATE_LIMIT_TIME_WINDOW=60000
 REDIS_URL=redis://localhost
-DATABASE_URL=postgresql://username:password@localhost:5432/chat-db
+POSTGRES_URL=postgresql://username:password@localhost:5432/chat-db
+ADMIN_PASSWORD=admin
 PASSWORD_SALT='$2b$10$Base64SaltWithLength22'
 JWT_SECRET=secret
 JWT_EXPIRES_IN=15m
 ```
 
-And run local app with
+Push DB schema and seed data (optional):
+
+```
+pnpm db:deploy
+```
+
+Start the app in watch mode:
 
 ```
 pnpm dev
 ```
 
-Checkout Swagger docs running on [http://localhost:8000/docs](http://localhost:8000/docs)
+Swagger docs will be available at [http://localhost:8000/docs](http://localhost:8000/docs)
