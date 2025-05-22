@@ -17,10 +17,7 @@ COPY /pnpm-lock.yaml /pnpm-workspace.yaml .
 COPY /prisma ./prisma
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
-
-RUN pnpm prisma -v
-
-RUN pnpm prisma generate
+RUN pnpm prisma -v && pnpm prisma generate
 
 # ====== PRODUCTION ======
 FROM base
